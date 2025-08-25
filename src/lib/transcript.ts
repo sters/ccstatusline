@@ -11,6 +11,7 @@ interface TokenUsage {
 }
 
 interface TranscriptMessage {
+  type?: string;
   message?: {
     usage?: TokenUsage;
   };
@@ -24,19 +25,25 @@ export async function readTranscriptTokens(transcriptPath: string): Promise<numb
   try {
     const content = await fs.readFile(transcriptPath, 'utf-8');
     const lines = content.split('\n');
-    let totalTokens = 0;
 
-    for (const line of lines) {
+    // Read from the end to find the last assistant message with token usage
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
       if (!line.trim()) continue;
 
       try {
         const data: TranscriptMessage = JSON.parse(line);
-        if (data.message?.usage) {
+        // Check if this is an assistant message with token usage
+        if (data.type === 'assistant' && data.message?.usage) {
           const usage = data.message.usage;
-          totalTokens += usage.input_tokens || 0;
-          totalTokens += usage.output_tokens || 0;
-          totalTokens += usage.cache_creation_input_tokens || 0;
-          totalTokens += usage.cache_read_input_tokens || 0;
+          // Calculate total tokens from the last assistant message with usage info
+          const totalTokens =
+            (usage.input_tokens || 0) +
+            (usage.output_tokens || 0) +
+            (usage.cache_creation_input_tokens || 0) +
+            (usage.cache_read_input_tokens || 0);
+
+          return totalTokens;
         }
       } catch {
         // Skip lines that aren't valid JSON
@@ -44,7 +51,7 @@ export async function readTranscriptTokens(transcriptPath: string): Promise<numb
       }
     }
 
-    return totalTokens;
+    return 0;
   } catch (error) {
     console.error(`Error reading transcript: ${error}`);
     return 0;
