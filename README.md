@@ -10,12 +10,6 @@ A customizable statusline for Claude Code that supports Mustache templates with 
 - Compaction percentage calculation
 - Color-coded output based on usage thresholds
 
-## Installation
-
-```bash
-npm install -g ccstatusline
-```
-
 ## Usage
 
 Configure in `.claude/settings.json`:
@@ -24,7 +18,7 @@ Configure in `.claude/settings.json`:
 {
   "statusLine": {
     "type": "command",
-    "command": "ccstatusline --template '{{modelName}} | {{shortCwd}} | {{tokenCountColored}} ({{compactionPercentageColored}})'"
+    "command": "bunx github:sters/ccstatusline --template '{{modelName}} | {{shortCwd}} | {{tokenCountColored}} ({{compactionPercentageColored}})'"
   }
 }
 ```
@@ -91,27 +85,27 @@ Multiple colors/styles can be combined with commas:
 
 ### Simple statusline
 ```bash
-ccstatusline --template '{{modelName}} | {{shortCwd}}'
+bunx github:sters/ccstatusline --template '{{modelName}} | {{shortCwd}}'
 ```
 
 ### With token tracking
 ```bash
-ccstatusline --template '{{modelName}} | {{tokenCount}} tokens ({{compactionPercentage}}%)'
+bunx github:sters/ccstatusline --template '{{modelName}} | {{tokenCount}} tokens ({{compactionPercentage}}%)'
 ```
 
 ### Color-coded with git info
 ```bash
-ccstatusline --template '{{modelName}} | {{shortCwd}}{{#gitBranch}} ({{gitBranch}}){{/gitBranch}} | {{tokenCountColored}} ({{compactionPercentageColored}})'
+bunx github:sters/ccstatusline --template '{{modelName}} | {{shortCwd}}{{#gitBranch}} ({{gitBranch}}){{/gitBranch}} | {{tokenCountColored}} ({{compactionPercentageColored}})'
 ```
 
 ### Full information
 ```bash
-ccstatusline --template '{{modelName}} | {{shortCwd}} | {{gitBranch}} | Tokens: {{tokenCount}}/160K ({{compactionPercentage}}%) | Cost: {{totalCostUsd}}'
+bunx github:sters/ccstatusline --template '{{modelName}} | {{shortCwd}} | {{gitBranch}} | Tokens: {{tokenCount}}/160K ({{compactionPercentage}}%) | Cost: {{totalCostUsd}}'
 ```
 
 ### With custom colors
 ```bash
-ccstatusline --template '{{color:cyan,bold:Model}} {{modelName}} | {{color:yellow:Dir:}} {{shortCwd}} | {{tokenCountColored}}'
+bunx github:sters/ccstatusline --template '{{color:cyan,bold:Model}} {{modelName}} | {{color:yellow:Dir:}} {{shortCwd}} | {{tokenCountColored}}'
 ```
 
 ## Command Options
