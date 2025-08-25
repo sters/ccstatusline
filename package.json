@@ -4,7 +4,7 @@
   "description": "Claude Code statusline with Mustache template support",
   "type": "module",
   "bin": {
-    "ccstatusline": "./dist/index.js"
+    "ccstatusline": "./src/index.ts"
   },
   "scripts": {
     "build": "tsc",
