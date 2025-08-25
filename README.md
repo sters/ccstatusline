@@ -32,8 +32,6 @@ Configure in `.claude/settings.json`:
 - `{{processedCwd}}` - Full current working directory path
 - `{{shortProjectDir}}` - Project directory (shortened with ~)
 - `{{projectDir}}` - Full project directory path
-- `{{gitBranch}}` - Current git branch
-- `{{gitStatus}}` - Git status
 - `{{timestamp}}` - ISO timestamp
 - `{{date}}` - Local date
 - `{{time}}` - Local time
@@ -52,6 +50,9 @@ Configure in `.claude/settings.json`:
 
 These functions are only calculated when used in the template:
 
+- `{{gitBranch}}` - Current git branch
+- `{{gitStatus}}` - Git status  
+- `{{gitStatusShort}}` - Git status (short format)
 - `{{tokenCount}}` - Formatted token count (e.g., "1.2K", "2.5M")
 - `{{tokenCountRaw}}` - Raw token count number
 - `{{compactionPercentage}}` - Percentage until auto-compaction (0-100)
