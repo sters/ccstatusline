@@ -168,11 +168,20 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
     'gitStatusShort'
   ] as const;
 
+  // Create view with data for regular variables
+  const view = { ...data };
+
   // Replace function calls in template with their evaluated values
+  // and also update the view for conditional sections
   for (const funcName of functionPatterns) {
     const regex = new RegExp(`{{${funcName}}}`, 'g');
-    if (regex.test(processedTemplate)) {
+    const conditionalRegex = new RegExp(`{{[#^]${funcName}}}`, 'g');
+
+    if (regex.test(processedTemplate) || conditionalRegex.test(processedTemplate)) {
       const value = await templateFunctions[funcName]();
+      // Update view for conditional sections
+      view[funcName] = value;
+      // Replace direct references
       processedTemplate = processedTemplate.replace(regex, String(value));
     }
   }
@@ -184,9 +193,6 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
     const colorCode = parseColorSpec(colorSpec);
     return colorCode ? `${colorCode}${text}${COLORS.reset}` : text;
   });
-
-  // Create view with data for regular variables
-  const view = { ...data };
 
   // Now render with regular Mustache for remaining variables
   return Mustache.render(processedTemplate, view);
