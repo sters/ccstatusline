@@ -1,0 +1,45 @@
+{
+  "name": "ccstatusline",
+  "version": "1.0.0",
+  "description": "Claude Code statusline with Mustache template support",
+  "type": "module",
+  "bin": {
+    "ccstatusline": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "statusline",
+    "claude",
+    "mustache",
+    "template"
+  ],
+  "author": "sters",
+  "license": "MIT",
+  "dependencies": {
+    "mustache": "^4.2.0",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/mustache": "^4.2.5",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
