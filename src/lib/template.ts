@@ -6,6 +6,7 @@ import {
   calculateCompactionPercentage,
   getCompactionColor
 } from './transcript.js';
+import { getGitBranch, getGitStatus, getGitStatusShort } from './git.js';
 
 export const DEFAULT_TEMPLATE = '{{modelName}} | {{shortCwd}}{{#gitBranch}} ({{gitBranch}}){{/gitBranch}}';
 
@@ -87,6 +88,11 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
     return cachedTokens;
   };
 
+  // Cache git information for this render call
+  let cachedGitBranch: string | null = null;
+  let cachedGitStatus: string | null = null;
+  let cachedGitStatusShort: string | null = null;
+
   // Define template functions
   const templateFunctions = {
     // Token count function
@@ -122,6 +128,30 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
       const color = getCompactionColor(percentage);
       const reset = '\x1b[0m';
       return `${color}${formatTokenCount(tokens)}${reset}`;
+    },
+
+    // Git branch function (cached)
+    gitBranch: function() {
+      if (cachedGitBranch === null) {
+        cachedGitBranch = getGitBranch(data.processedCwd);
+      }
+      return cachedGitBranch;
+    },
+
+    // Git status function (cached)
+    gitStatus: function() {
+      if (cachedGitStatus === null) {
+        cachedGitStatus = getGitStatus(data.processedCwd);
+      }
+      return cachedGitStatus;
+    },
+
+    // Git status short indicator (cached)
+    gitStatusShort: function() {
+      if (cachedGitStatusShort === null) {
+        cachedGitStatusShort = getGitStatusShort(data.processedCwd);
+      }
+      return cachedGitStatusShort;
     }
   };
 
@@ -132,7 +162,10 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
     'tokenCountRaw',
     'compactionPercentage',
     'compactionPercentageColored',
-    'tokenCountColored'
+    'tokenCountColored',
+    'gitBranch',
+    'gitStatus',
+    'gitStatusShort'
   ] as const;
 
   // Replace function calls in template with their evaluated values

@@ -30,12 +30,8 @@ async function main() {
     const data = processInput(input);
     const template = options.template || DEFAULT_TEMPLATE;
     
-    // Check if template uses async functions (token functions)
-    const usesTokenFunctions = /{{(tokenCount|tokenCountRaw|compactionPercentage|compactionPercentageColored|tokenCountColored)}}/.test(template);
-    
-    const rendered = usesTokenFunctions 
-      ? await renderTemplateAsync(template, data)
-      : renderTemplate(template, data);
+    // Always use async rendering to support all template functions
+    const rendered = await renderTemplateAsync(template, data);
 
     console.log(rendered);
   } catch (error) {

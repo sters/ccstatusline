@@ -199,9 +199,15 @@ describe('renderTemplateAsync', () => {
 
     // Mock transcript functions
     vi.spyOn(transcript, 'readTranscriptTokens').mockResolvedValue(125000);
-    vi.spyOn(transcript, 'formatTokenCount').mockReturnValue('125.0K');
-    vi.spyOn(transcript, 'calculateCompactionPercentage').mockReturnValue(78);
-    vi.spyOn(transcript, 'getCompactionColor').mockReturnValue('\x1b[33m');
+    vi.spyOn(transcript, 'formatTokenCount').mockImplementation((tokens) => {
+      return tokens === 0 ? '0' : '125.0K';
+    });
+    vi.spyOn(transcript, 'calculateCompactionPercentage').mockImplementation((tokens) => {
+      return tokens === 0 ? 0 : 78;
+    });
+    vi.spyOn(transcript, 'getCompactionColor').mockImplementation((percentage) => {
+      return percentage === 0 ? '\x1b[32m' : '\x1b[33m';
+    });
   });
 
   afterEach(() => {
@@ -240,14 +246,20 @@ describe('renderTemplateAsync', () => {
   });
 
   it('should handle missing transcript path', async () => {
-    // Reset mock for this specific test
-    vi.restoreAllMocks();
-    vi.spyOn(transcript, 'readTranscriptTokens').mockResolvedValue(0);
+    // The renderTemplateAsync function checks if transcriptPath is empty
+    // and returns 0 without calling readTranscriptTokens
+    const dataWithoutPath = { ...mockData, transcriptPath: '' };
     
-    mockData.transcriptPath = '';
-    const template = 'Tokens: {{tokenCount}} ({{compactionPercentage}}%)';
-    const result = await renderTemplateAsync(template, mockData);
-    expect(result).toBe('Tokens: 0 (0%)');
+    // Test with token functions when path is empty
+    const tokenTemplate = 'Tokens: {{tokenCount}}';
+    const tokenResult = await renderTemplateAsync(tokenTemplate, dataWithoutPath);
+    // When transcriptPath is empty, getTokens() returns 0, formatTokenCount(0) returns '0'
+    expect(tokenResult).toBe('Tokens: 0');
+    
+    // Test compaction percentage with empty path
+    const compactionTemplate = '{{compactionPercentage}}%';
+    const compactionResult = await renderTemplateAsync(compactionTemplate, dataWithoutPath);
+    expect(compactionResult).toBe('0%');
   });
 
   it('should combine token functions with regular variables', async () => {

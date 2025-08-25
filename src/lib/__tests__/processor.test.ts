@@ -1,11 +1,17 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { processInput } from '../processor';
 import { StatuslineInput } from '../types';
 
 describe('processInput', () => {
+  const originalHome = process.env.HOME;
+  
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv('HOME', '/home/user');
+    process.env.HOME = '/home/user';
+  });
+  
+  afterEach(() => {
+    process.env.HOME = originalHome;
   });
 
   it('should process input with model and workspace', () => {
