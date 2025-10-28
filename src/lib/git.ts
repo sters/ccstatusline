@@ -1,8 +1,15 @@
 import { execSync } from 'child_process';
 
+// Timeout for git commands (5 seconds)
+const GIT_TIMEOUT = 5000;
+// Max buffer size for git output (10MB)
+const MAX_BUFFER = 10 * 1024 * 1024;
+
 export function getGitBranch(cwd?: string): string {
   try {
-    const options = cwd ? { cwd, encoding: 'utf8' as const } : { encoding: 'utf8' as const };
+    const options = cwd
+      ? { cwd, encoding: 'utf8' as const, timeout: GIT_TIMEOUT, maxBuffer: MAX_BUFFER }
+      : { encoding: 'utf8' as const, timeout: GIT_TIMEOUT, maxBuffer: MAX_BUFFER };
     const branch = execSync('git rev-parse --abbrev-ref HEAD', options).trim();
     return branch;
   } catch {
@@ -12,8 +19,10 @@ export function getGitBranch(cwd?: string): string {
 
 export function getGitStatus(cwd?: string): string {
   try {
-    const options = cwd ? { cwd, encoding: 'utf8' as const } : { encoding: 'utf8' as const };
-    const status = execSync('git status --porcelain', options).trim();
+    const options = cwd
+      ? { cwd, encoding: 'utf8' as const, timeout: GIT_TIMEOUT, maxBuffer: MAX_BUFFER }
+      : { encoding: 'utf8' as const, timeout: GIT_TIMEOUT, maxBuffer: MAX_BUFFER };
+    const status = execSync('git --no-optional-locks status --porcelain', options).trim();
 
     if (!status) {
       return 'clean';
@@ -40,8 +49,10 @@ export function getGitStatus(cwd?: string): string {
 
 export function getGitStatusShort(cwd?: string): string {
   try {
-    const options = cwd ? { cwd, encoding: 'utf8' as const } : { encoding: 'utf8' as const };
-    const status = execSync('git status --porcelain', options).trim();
+    const options = cwd
+      ? { cwd, encoding: 'utf8' as const, timeout: GIT_TIMEOUT, maxBuffer: MAX_BUFFER }
+      : { encoding: 'utf8' as const, timeout: GIT_TIMEOUT, maxBuffer: MAX_BUFFER };
+    const status = execSync('git --no-optional-locks status --porcelain', options).trim();
 
     if (!status) {
       return '✓';

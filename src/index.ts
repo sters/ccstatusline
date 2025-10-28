@@ -3,7 +3,7 @@ import { program } from 'commander';
 import chalk from 'chalk';
 import { readStdin } from './lib/stdin.js';
 import { processInput } from './lib/processor.js';
-import { renderTemplate, renderTemplateAsync, DEFAULT_TEMPLATE } from './lib/template.js';
+import { renderTemplateAsync, DEFAULT_TEMPLATE } from './lib/template.js';
 import { StatuslineInput, CliOptions } from './lib/types.js';
 
 async function main() {

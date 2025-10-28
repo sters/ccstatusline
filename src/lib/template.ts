@@ -180,7 +180,7 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
     if (regex.test(processedTemplate) || conditionalRegex.test(processedTemplate)) {
       const value = await templateFunctions[funcName]();
       // Update view for conditional sections
-      view[funcName] = value;
+      view[funcName] = String(value);
       // Replace direct references
       processedTemplate = processedTemplate.replace(regex, String(value));
     }
