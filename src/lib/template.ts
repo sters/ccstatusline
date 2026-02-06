@@ -1,11 +1,6 @@
 import Mustache from 'mustache';
 import { ProcessedData } from './types.js';
-import {
-  readTranscriptTokens,
-  formatTokenCount,
-  calculateCompactionPercentage,
-  getCompactionColor
-} from './transcript.js';
+import { getCompactionColor } from './transcript.js';
 import { getGitBranch, getGitStatus, getGitStatusShort } from './git.js';
 
 export const DEFAULT_TEMPLATE = '{{modelName}} | {{shortCwd}}{{#gitBranch}} ({{gitBranch}}){{/gitBranch}}';
@@ -79,15 +74,6 @@ function parseColorSpec(spec: string): string {
 export async function renderTemplateAsync(template: string, data: ProcessedData): Promise<string> {
   Mustache.escape = (text) => text;
 
-  // Cache tokens for this render call to avoid multiple reads
-  let cachedTokens: number | null = null;
-  const getTokens = async () => {
-    if (cachedTokens !== null) return cachedTokens;
-    if (!data.transcriptPath) return 0;
-    cachedTokens = await readTranscriptTokens(data.transcriptPath);
-    return cachedTokens;
-  };
-
   // Cache git information for this render call
   let cachedGitBranch: string | null = null;
   let cachedGitStatus: string | null = null;
@@ -95,77 +81,48 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
 
   // Define template functions
   const templateFunctions = {
-    // Token count function
-    tokenCount: async function() {
-      const tokens = await getTokens();
-      return formatTokenCount(tokens);
-    },
-
-    // Raw token count (unformatted)
-    tokenCountRaw: async function() {
-      return await getTokens();
-    },
-
-    // Compaction percentage
-    compactionPercentage: async function() {
-      const tokens = await getTokens();
-      return calculateCompactionPercentage(tokens);
-    },
-
     // Compaction percentage with color
-    compactionPercentageColored: async function() {
-      const tokens = await getTokens();
-      const percentage = calculateCompactionPercentage(tokens);
+    compactionPercentageColored: function() {
+      const percentage = data.compactionPercentage;
       const color = getCompactionColor(percentage);
-      const reset = '\x1b[0m';
-      return `${color}${percentage}%${reset}`;
+      return `${color}${percentage}%\x1b[0m`;
     },
 
     // Token count with color based on percentage
-    tokenCountColored: async function() {
-      const tokens = await getTokens();
-      const percentage = calculateCompactionPercentage(tokens);
-      const color = getCompactionColor(percentage);
-      const reset = '\x1b[0m';
-      return `${color}${formatTokenCount(tokens)}${reset}`;
+    tokenCountColored: function() {
+      const color = getCompactionColor(data.compactionPercentage);
+      return `${color}${data.tokenCount}\x1b[0m`;
     },
 
-    // Git branch function (cached)
+    // Git branch: stdin priority, fallback to command
     gitBranch: function() {
-      if (cachedGitBranch === null) {
-        cachedGitBranch = getGitBranch(data.processedCwd);
-      }
+      if (data.gitBranch) return data.gitBranch;
+      if (cachedGitBranch === null) cachedGitBranch = getGitBranch(data.processedCwd);
       return cachedGitBranch;
     },
 
-    // Git status function (cached)
+    // Git status: stdin priority, fallback to command
     gitStatus: function() {
-      if (cachedGitStatus === null) {
-        cachedGitStatus = getGitStatus(data.processedCwd);
-      }
+      if (data.gitStatus) return data.gitStatus;
+      if (cachedGitStatus === null) cachedGitStatus = getGitStatus(data.processedCwd);
       return cachedGitStatus;
     },
 
     // Git status short indicator (cached)
     gitStatusShort: function() {
-      if (cachedGitStatusShort === null) {
-        cachedGitStatusShort = getGitStatusShort(data.processedCwd);
-      }
+      if (cachedGitStatusShort === null) cachedGitStatusShort = getGitStatusShort(data.processedCwd);
       return cachedGitStatusShort;
-    }
+    },
   };
 
-  // Pre-process template to handle async functions
+  // Pre-process template to handle function patterns
   let processedTemplate = template;
   const functionPatterns = [
-    'tokenCount',
-    'tokenCountRaw',
-    'compactionPercentage',
     'compactionPercentageColored',
     'tokenCountColored',
     'gitBranch',
     'gitStatus',
-    'gitStatusShort'
+    'gitStatusShort',
   ] as const;
 
   // Create view with data for regular variables
@@ -178,7 +135,7 @@ export async function renderTemplateAsync(template: string, data: ProcessedData)
     const conditionalRegex = new RegExp(`{{[#^]${funcName}}}`, 'g');
 
     if (regex.test(processedTemplate) || conditionalRegex.test(processedTemplate)) {
-      const value = await templateFunctions[funcName]();
+      const value = templateFunctions[funcName]();
       // Update view for conditional sections
       view[funcName] = String(value);
       // Replace direct references

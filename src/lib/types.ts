@@ -26,6 +26,22 @@ export interface StatuslineInput {
     branch?: string;
     status?: string;
   };
+  context_window?: {
+    total_input_tokens: number;
+    total_output_tokens: number;
+    context_window_size: number;
+    used_percentage: number;
+    remaining_percentage: number;
+    current_usage?: {
+      input_tokens: number;
+      output_tokens: number;
+      cache_creation_input_tokens: number;
+      cache_read_input_tokens: number;
+    };
+  };
+  exceeds_200k_tokens?: boolean;
+  vim?: { mode: string };
+  agent?: { name: string };
   [key: string]: unknown;
 }
 
@@ -63,6 +79,27 @@ export interface ProcessedData extends StatuslineInput {
   transcriptPath: string;
   version: string;
   outputStyleName: string;
+
+  // Context window
+  contextWindowSize: number;
+  usedPercentage: number;
+  remainingPercentage: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  currentInputTokens: number;
+  currentOutputTokens: number;
+  cacheCreationInputTokens: number;
+  cacheReadInputTokens: number;
+
+  // Token display
+  tokenCount: string;
+  tokenCountRaw: number;
+  compactionPercentage: number;
+
+  // New fields
+  exceeds200kTokens: boolean;
+  vimMode: string;
+  agentName: string;
 }
 
 export interface CliOptions {

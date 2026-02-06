@@ -199,4 +199,78 @@ describe('processInput', () => {
     expect(result.totalApiDurationSec).toBe('0.5s');
     expect(result.totalLinesChanged).toBe(7);
   });
+
+  it('should process context_window data', () => {
+    const input: StatuslineInput = {
+      context_window: {
+        total_input_tokens: 50000,
+        total_output_tokens: 10000,
+        context_window_size: 200000,
+        used_percentage: 30,
+        remaining_percentage: 70,
+        current_usage: {
+          input_tokens: 5000,
+          output_tokens: 1000,
+          cache_creation_input_tokens: 2000,
+          cache_read_input_tokens: 3000,
+        },
+      },
+    };
+
+    const result = processInput(input);
+
+    expect(result.contextWindowSize).toBe(200000);
+    expect(result.usedPercentage).toBe(30);
+    expect(result.remainingPercentage).toBe(70);
+    expect(result.totalInputTokens).toBe(50000);
+    expect(result.totalOutputTokens).toBe(10000);
+    expect(result.currentInputTokens).toBe(5000);
+    expect(result.currentOutputTokens).toBe(1000);
+    expect(result.cacheCreationInputTokens).toBe(2000);
+    expect(result.cacheReadInputTokens).toBe(3000);
+    expect(result.tokenCount).toBe('60.0K');
+    expect(result.tokenCountRaw).toBe(60000);
+    expect(result.compactionPercentage).toBe(30);
+  });
+
+  it('should use defaults when context_window is missing', () => {
+    const input: StatuslineInput = {};
+    const result = processInput(input);
+
+    expect(result.contextWindowSize).toBe(0);
+    expect(result.usedPercentage).toBe(0);
+    expect(result.remainingPercentage).toBe(0);
+    expect(result.totalInputTokens).toBe(0);
+    expect(result.totalOutputTokens).toBe(0);
+    expect(result.currentInputTokens).toBe(0);
+    expect(result.currentOutputTokens).toBe(0);
+    expect(result.cacheCreationInputTokens).toBe(0);
+    expect(result.cacheReadInputTokens).toBe(0);
+    expect(result.tokenCount).toBe('0');
+    expect(result.tokenCountRaw).toBe(0);
+    expect(result.compactionPercentage).toBe(0);
+  });
+
+  it('should process vim, agent, and exceeds_200k_tokens', () => {
+    const input: StatuslineInput = {
+      vim: { mode: 'NORMAL' },
+      agent: { name: 'test-agent' },
+      exceeds_200k_tokens: true,
+    };
+
+    const result = processInput(input);
+
+    expect(result.vimMode).toBe('NORMAL');
+    expect(result.agentName).toBe('test-agent');
+    expect(result.exceeds200kTokens).toBe(true);
+  });
+
+  it('should use defaults for vim, agent, exceeds_200k_tokens when missing', () => {
+    const input: StatuslineInput = {};
+    const result = processInput(input);
+
+    expect(result.vimMode).toBe('');
+    expect(result.agentName).toBe('');
+    expect(result.exceeds200kTokens).toBe(false);
+  });
 });

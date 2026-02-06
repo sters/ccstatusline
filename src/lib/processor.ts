@@ -1,4 +1,5 @@
 import { StatuslineInput, ProcessedData } from './types.js';
+import { formatTokenCount } from './transcript.js';
 
 function formatDuration(ms: number | undefined): string {
   if (!ms) return '0s';
@@ -35,6 +36,12 @@ export function processInput(input: StatuslineInput): ProcessedData {
   const totalLinesRemoved = input.cost?.total_lines_removed || 0;
   const totalLinesChanged = totalLinesAdded + totalLinesRemoved;
 
+  // Process context window
+  const cw = input.context_window;
+  const totalInputTokens = cw?.total_input_tokens ?? 0;
+  const totalOutputTokens = cw?.total_output_tokens ?? 0;
+  const tokenCountRaw = totalInputTokens + totalOutputTokens;
+
   return {
     ...input,
     // Directory paths
@@ -70,5 +77,26 @@ export function processInput(input: StatuslineInput): ProcessedData {
     transcriptPath: input.transcript_path || '',
     version: input.version || '',
     outputStyleName: input.output_style?.name || '',
+
+    // Context window
+    contextWindowSize: cw?.context_window_size ?? 0,
+    usedPercentage: cw?.used_percentage ?? 0,
+    remainingPercentage: cw?.remaining_percentage ?? 0,
+    totalInputTokens,
+    totalOutputTokens,
+    currentInputTokens: cw?.current_usage?.input_tokens ?? 0,
+    currentOutputTokens: cw?.current_usage?.output_tokens ?? 0,
+    cacheCreationInputTokens: cw?.current_usage?.cache_creation_input_tokens ?? 0,
+    cacheReadInputTokens: cw?.current_usage?.cache_read_input_tokens ?? 0,
+
+    // Token display
+    tokenCount: formatTokenCount(tokenCountRaw),
+    tokenCountRaw,
+    compactionPercentage: cw?.used_percentage ?? 0,
+
+    // New fields
+    exceeds200kTokens: input.exceeds_200k_tokens ?? false,
+    vimMode: input.vim?.mode ?? '',
+    agentName: input.agent?.name ?? '',
   };
 }

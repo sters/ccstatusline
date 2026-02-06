@@ -1,14 +1,14 @@
 # ccstatusline
 
-A customizable statusline for Claude Code that supports Mustache templates with lazy-evaluated functions for token counting and compaction tracking.
+A customizable statusline for Claude Code that supports Mustache templates with lazy-evaluated functions for git info and color-coded token tracking.
 
 ## Features
 
 - Mustache template support for customizable statusline
-- Lazy-evaluated template functions for expensive operations
-- Token count tracking from transcript files
-- Compaction percentage calculation
+- Context window token tracking from stdin data
+- Lazy-evaluated git template functions
 - Color-coded output based on usage thresholds
+- Vim mode and agent name display
 
 ## Usage
 
@@ -46,20 +46,40 @@ Configure in `.claude/settings.json`:
 - `{{version}}` - Claude Code version
 - `{{outputStyleName}}` - Output style name
 
+### Context Window Variables
+
+These are derived from the `context_window` field in stdin data:
+
+- `{{tokenCount}}` - Formatted token count (e.g., "1.2K", "2.5M") - sum of input + output tokens
+- `{{tokenCountRaw}}` - Raw token count number
+- `{{compactionPercentage}}` - Context window used percentage (0-100)
+- `{{contextWindowSize}}` - Total context window size in tokens
+- `{{usedPercentage}}` - Context window used percentage
+- `{{remainingPercentage}}` - Context window remaining percentage
+- `{{totalInputTokens}}` - Total input tokens
+- `{{totalOutputTokens}}` - Total output tokens
+- `{{currentInputTokens}}` - Current request input tokens
+- `{{currentOutputTokens}}` - Current request output tokens
+- `{{cacheCreationInputTokens}}` - Cache creation input tokens
+- `{{cacheReadInputTokens}}` - Cache read input tokens
+- `{{exceeds200kTokens}}` - Whether token usage exceeds 200K
+
+### Additional Variables
+
+- `{{vimMode}}` - Current vim mode (e.g., "NORMAL", "INSERT")
+- `{{agentName}}` - Current agent name
+
 ### Template Functions (Lazy-Evaluated)
 
 These functions are only calculated when used in the template:
 
-- `{{gitBranch}}` - Current git branch
-- `{{gitStatus}}` - Git status  
-- `{{gitStatusShort}}` - Git status (short format)
-- `{{tokenCount}}` - Formatted token count (e.g., "1.2K", "2.5M")
-- `{{tokenCountRaw}}` - Raw token count number
-- `{{compactionPercentage}}` - Percentage until auto-compaction (0-100)
+- `{{gitBranch}}` - Current git branch (stdin priority, command fallback)
+- `{{gitStatus}}` - Git status (stdin priority, command fallback)
+- `{{gitStatusShort}}` - Git status (short format, command only)
 - `{{compactionPercentageColored}}` - Percentage with color coding:
   - Green: < 70%
   - Yellow: 70-89%
-  - Red: ≥ 90%
+  - Red: >= 90%
 - `{{tokenCountColored}}` - Token count with color based on percentage
 
 ### Color Function
@@ -118,9 +138,9 @@ bunx github:sters/ccstatusline --template '{{color:cyan,bold:Model}} {{modelName
 
 ## Performance Notes
 
-Token counting functions read and parse transcript files, which can be expensive. The implementation includes:
-- Lazy evaluation (only calculated when used in template)
-- Efficient JSONL parsing
+- Token data is read from stdin (no file I/O required)
+- Git functions use lazy evaluation (only calculated when used in template)
+- Git info from stdin is preferred over command execution for better performance
 
 ## License
 
