@@ -29,8 +29,10 @@ Configure in `.claude/settings.json`:
 - `{{modelName}}` - Current model display name
 - `{{modelId}}` - Current model ID
 - `{{shortCwd}}` - Current working directory (shortened with ~)
+- `{{shortCwdAbbrev}}` - Current working directory with parent dirs abbreviated to their first character (e.g. `~/a/b/c/foo-bar-baz`)
 - `{{processedCwd}}` - Full current working directory path
 - `{{shortProjectDir}}` - Project directory (shortened with ~)
+- `{{shortProjectDirAbbrev}}` - Project directory with parent dirs abbreviated to their first character
 - `{{projectDir}}` - Full project directory path
 - `{{timestamp}}` - ISO timestamp
 - `{{date}}` - Local date

@@ -19,6 +19,23 @@ function shortenPath(path: string, home: string): string {
   return path.replace(home, '~');
 }
 
+// Abbreviate each parent directory to its first character, keeping the
+// last segment intact. e.g. ~/aaa/bbb/ccc/foo-bar-baz -> ~/a/b/c/foo-bar-baz
+function abbreviatePath(path: string): string {
+  const segments = path.split('/');
+  if (segments.length <= 1) return path;
+
+  const lastIndex = segments.length - 1;
+  return segments
+    .map((segment, index) => {
+      // Keep the last segment full, and preserve empty segments
+      // (leading '/') and the '~' home marker as-is.
+      if (index === lastIndex || segment === '') return segment;
+      return segment.charAt(0);
+    })
+    .join('/');
+}
+
 export function processInput(input: StatuslineInput): ProcessedData {
   const home = process.env.HOME || '';
 
@@ -27,6 +44,8 @@ export function processInput(input: StatuslineInput): ProcessedData {
   const projectDir = input.workspace?.project_dir || processedCwd;
   const shortCwd = shortenPath(processedCwd, home);
   const shortProjectDir = shortenPath(projectDir, home);
+  const shortCwdAbbrev = abbreviatePath(shortCwd);
+  const shortProjectDirAbbrev = abbreviatePath(shortProjectDir);
 
   // Process time
   const now = new Date();
@@ -49,6 +68,8 @@ export function processInput(input: StatuslineInput): ProcessedData {
     shortCwd,
     projectDir,
     shortProjectDir,
+    shortCwdAbbrev,
+    shortProjectDirAbbrev,
 
     // Model info
     modelName: input.model?.display_name || 'Unknown',

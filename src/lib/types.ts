@@ -51,6 +51,8 @@ export interface ProcessedData extends StatuslineInput {
   shortCwd: string;
   projectDir: string;
   shortProjectDir: string;
+  shortCwdAbbrev: string;
+  shortProjectDirAbbrev: string;
 
   // Model info
   modelName: string;

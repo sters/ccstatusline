@@ -36,6 +36,46 @@ describe('processInput', () => {
     expect(result.shortProjectDir).toBe('~/projects');
   });
 
+  it('should abbreviate parent directories to their first character', () => {
+    const input: StatuslineInput = {
+      workspace: {
+        current_dir: '/home/user/aaa/bbb/ccc/foo-bar-baz',
+        project_dir: '/home/user/aaa/bbb'
+      }
+    };
+
+    const result = processInput(input);
+
+    expect(result.shortCwd).toBe('~/aaa/bbb/ccc/foo-bar-baz');
+    expect(result.shortCwdAbbrev).toBe('~/a/b/c/foo-bar-baz');
+    expect(result.shortProjectDirAbbrev).toBe('~/a/bbb');
+  });
+
+  it('should keep abbreviated path intact when there is no parent', () => {
+    const input: StatuslineInput = {
+      workspace: {
+        current_dir: '/home/user'
+      }
+    };
+
+    const result = processInput(input);
+
+    expect(result.shortCwd).toBe('~');
+    expect(result.shortCwdAbbrev).toBe('~');
+  });
+
+  it('should abbreviate absolute paths without HOME prefix', () => {
+    const input: StatuslineInput = {
+      workspace: {
+        current_dir: '/var/log/application'
+      }
+    };
+
+    const result = processInput(input);
+
+    expect(result.shortCwdAbbrev).toBe('/v/l/application');
+  });
+
   it('should use defaults when model is missing', () => {
     const input: StatuslineInput = {
       workspace: {

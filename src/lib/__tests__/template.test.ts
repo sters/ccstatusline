@@ -12,6 +12,8 @@ describe('renderTemplate', () => {
       shortCwd: '~/project',
       projectDir: '/home/user/project',
       shortProjectDir: '~/project',
+      shortCwdAbbrev: '~/project',
+      shortProjectDirAbbrev: '~/project',
 
       // Model info
       modelName: 'Claude',
@@ -199,6 +201,8 @@ describe('renderTemplateAsync', () => {
       shortCwd: '~/project',
       projectDir: '/home/user/project',
       shortProjectDir: '~/project',
+      shortCwdAbbrev: '~/project',
+      shortProjectDirAbbrev: '~/project',
 
       // Model info
       modelName: 'Claude',
